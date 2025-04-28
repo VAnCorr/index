@@ -1,0 +1,180 @@
+/* rubrica.css */
+body {
+    font-family: 'Lato', sans-serif;
+    background-color: #f8f9fa; /* Gris muy claro */
+    color: #333;
+}
+
+header h1 {
+    color: #0d6efd; /* Azul Bootstrap primario */
+    font-weight: 700;
+}
+
+header h2 {
+    color: #6c757d; /* Gris Bootstrap secundario */
+    font-size: 1.25rem;
+}
+
+.card-header {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.section-header {
+     background-color: #e0f2f1; /* Verde agua muy suave (similar al anterior) */
+     color: #212529; /* Texto oscuro */
+     border-bottom: 1px solid #dee2e6;
+}
+
+.total-score-section {
+    background-color: #d1ecf1; /* Azul claro info */
+    border-top: 1px solid #bee5eb;
+}
+
+.rubric-table th,
+.rubric-table td {
+    vertical-align: middle;
+    text-align: center; /* Centra texto en celdas */
+    padding: 0.5rem; /* Reduce padding */
+}
+
+.rubric-table th:first-child, /* Alinea a la izquierda la columna de criterios */
+.rubric-table td:first-child {
+    text-align: left;
+    padding-left: 1rem;
+}
+
+.rubric-table label.form-label {
+    margin-bottom: 0; /* Evita espacio extra debajo del label del criterio */
+}
+
+.form-check-input {
+    cursor: pointer;
+    width: 1.3em; /* Aumenta tamaño de radio buttons */
+    height: 1.3em;
+}
+
+/* Oculta input fields en PDF */
+@media print {
+    input[type="text"],
+    input[type="date"],
+    textarea,
+    button,
+    header h2,
+    .total-score-section h4,
+    .card-footer {
+        display: none !important;
+    }
+
+     body {
+        font-size: 10pt;
+        background-color: #fff !important;
+        color: #000;
+    }
+
+    .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+    }
+     .card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        margin-bottom: 1rem !important;
+    }
+    .card-header {
+        background-color: #e9ecef !important; /* Gris claro para impresión */
+        color: #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        border-bottom: 1px solid #ccc !important;
+    }
+
+    .card-body {
+         padding: 0.5rem !important;
+    }
+
+    .rubric-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 9pt !important;
+        border: 1px solid #ccc !important;
+    }
+
+    .rubric-table th,
+    .rubric-table td {
+        border: 1px solid #ccc !important;
+        padding: 0.3rem !important;
+    }
+
+     .rubric-table thead {
+        background-color: #f8f9fa !important;
+         -webkit-print-color-adjust: exact !important;
+         print-color-adjust: exact !important;
+    }
+
+     /* Mostrar texto seleccionado en lugar de radio buttons */
+    .form-check-input { display: none; } /* Oculta radios */
+    .form-check-input:checked::after {
+        content: '✔'; /* Muestra marca en el seleccionado */
+        display: inline-block;
+        font-size: 1.2em;
+        color: black;
+        margin-left: -1em; /* Ajusta posición */
+    }
+
+     /* Mostrar info general */
+    #evaluatorNameDisplay,
+    #residentNameDisplay,
+    #evaluationDateDisplay,
+    #classTopicDisplay,
+    #strengthsDisplay,
+    #areasForImprovementDisplay {
+        display: block !important;
+        font-weight: normal !important;
+        border-bottom: 1px dotted #ccc;
+        padding: 2px 0;
+        margin-bottom: 5px;
+    }
+
+     /* Info general para PDF (se llenará con JS) */
+    .pdf-info-field { display: none; }
+
+    @page {
+      margin: 1cm;
+      size: A4; /* O letter */
+    }
+
+    /* Añadir cabecera en cada página impresa */
+     body::before {
+        content: "Reporte de Evaluación - Residencia UCI";
+        display: block;
+        text-align: center;
+        font-size: 14pt;
+        font-weight: bold;
+        margin-bottom: 1cm;
+        position: fixed;
+        top: 0.5cm;
+        left: 0;
+        right: 0;
+    }
+
+    /* Evitar que la cabecera se solape con el contenido en la primera página */
+    body { padding-top: 1.5cm; }
+
+}
+
+/* Estilos para la información que se mostrará en el PDF */
+.pdf-info-field {
+    display: none; /* Oculto por defecto en pantalla */
+    margin-bottom: 0.5rem;
+    font-size: 11pt;
+}
+.pdf-info-field strong {
+    display: inline-block;
+    min-width: 180px; /* Ajusta según necesidad */
+}
+</style>

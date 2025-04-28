@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rúbrica Evaluación v7 (PDF Corregido) - Dr. Jose Indalecio Lopez</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        /* --- Estilos Generales y de Pantalla (igual que v6) --- */
+        body { font-family: 'Poppins', sans-serif; background-color: #f9f9f9; color: #333; }
+        .container { max-width: 900px; }
+        .card { border-radius: 12px; box-shadow: 0px 4px 8px rgba(0,0,0,0.08); border: none; margin-bottom: 2rem; background-color: #fff; overflow: hidden; }
+        .card-header { font-weight: 700; font-size: 1.1rem; color: #2563eb; background-color: #f0f3f5; border-bottom: 1px solid #e5e7eb; padding: 0.8rem 1.2rem; }
+        header h1, .rubric-section .card-header span:first-child { color: #2563eb; font-weight: 700; }
+        header h2 { color: #6c757d; font-size: 1.25rem; }
+        .rubric-section .card-header { background-color: #eef2ff; }
+        .rubric-section .score-display { font-weight: 500; color: #555; font-size: 0.9em;}
+        #infoGeneralCard .card-body { padding: 1.5rem; }
+        #infoGeneralRow { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+        #infoGeneralRow > div { flex: 1 1 200px; }
+        .input-group .input-group-text { background-color: transparent; border:none; color: #2563eb; padding-left: 0;}
+        .form-control, .form-select { border: 1px solid #d1d5db; border-radius: 8px !important;}
+        .form-control:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);}
+        .rubric-table { table-layout: fixed; }
+        .rubric-table th, .rubric-table td { vertical-align: top; text-align: center; padding: 0.8rem 0.3rem; }
+        .rubric-table tbody tr { border-bottom: 1px solid #e5e7eb; }
+        .rubric-table tbody tr:last-child { border-bottom: none; }
+        .rubric-table th:first-child, .rubric-table td:first-child { text-align: left; padding-left: 1.2rem; width: 40%; vertical-align: middle;}
+        .rubric-table label.form-label { margin-bottom: 0; font-weight: 500; color: #333;}
+        .score-options-wrapper { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; flex-wrap: wrap; gap: 12px; padding: 5px 0; width: 100%; }
+        .score-option { display: flex; flex-direction: column; align-items: center; min-width: 25px; }
+        .score-value { display: block; font-size: 11px; color: #555; font-weight: 500; margin-bottom: 4px; line-height: 1; text-align: center; }
+        .form-check-input[type="radio"] { transform: scale(1.2); margin: 0 auto !important; display: block; cursor: pointer; appearance: none; border-radius: 50%; width: 1.2em; height: 1.2em; border: 2px solid #adb5bd; transition: all 0.15s ease-in-out; background-color: #fff; position: relative; }
+        .form-check-input[type="radio"]:checked { background-color: #2563eb; border-color: #2563eb; }
+        .form-check-input[type="radio"]:checked::before { content: ""; display: block; width: 0.5em; height: 0.5em; border-radius: 50%; background-color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .rubric-table td:has(input[type="radio"]:checked) { background-color: #dbeafe !important; }
+        #commentsCard .card-header { background-color: #f8f9fa; color: #2563eb;}
+        textarea.form-control { border-radius: 8px; min-height: 120px; border-color: #d1d5db;}
+        textarea.form-control::placeholder { color: #9ca3af; }
+        #totalScoreCard { background-color: #e0f2fe; border: 1px solid #bae6fd; }
+        #totalScoreCard .card-body { padding: 1.5rem; }
+        #totalScoreCard h4 { color: #0369a1; font-weight: 700; font-size: 1.8rem; margin-bottom: 0.2rem;}
+        #totalScoreCard small { display: none !important; } /* Ocultar puntaje directo siempre */
+        #buttonsCard { background-color: transparent; box-shadow: none; }
+        .card-footer { background-color: transparent; border-top: none; text-align: center; padding: 1.5rem 0 0 0;}
+        .card-footer .btn { border-width: 2px !important; border-radius: 8px; padding: 0.7rem 1.5rem; font-weight: 500; transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out; }
+        .card-footer .btn:hover { transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
+        #calculateButton { border-color: #1d4ed8; background-color: #2563eb; color: white;} #calculateButton:hover { background-color: #1d4ed8; border-color: #1e40af;}
+        #exportPdfButton { border-color: #15803d; background-color: #16a34a; color: white;} #exportPdfButton:hover { background-color: #15803d; border-color: #166534;}
+        #resetButton { border-color: #d97706; background-color: #f59e0b; color: white;} #resetButton:hover { background-color: #d97706; border-color: #b45309;}
+        #exportPdfButton:disabled { background-color: #9ca3af; border-color: #6b7280; cursor: not-allowed;}
+
+        /* --- Responsive --- */
+        @media (max-width: 767.98px) { body { font-size: 0.95rem; } .container { max-width: 100%; padding: 0 15px; } .card-header { font-size: 1rem; } .rubric-table th:first-child, .rubric-table td:first-child { width: 35%; font-size: 0.9em; } .rubric-table td:not(:first-child) { padding: 0.6rem 0.1rem;} .score-value { font-size: 10px; } .score-options-wrapper { gap: 8px; } #totalScoreCard h4 { font-size: 1.5rem; } .card-footer .btn { font-size: 0.9rem; padding: 0.6rem 1rem; } }
+        @media (max-width: 575.98px) { #infoGeneralRow > div { min-width: 100%; flex-basis: auto; } .rubric-table th:first-child, .rubric-table td:first-child { padding-left: 0.8rem; width: 40%;} .score-value { font-size: 9px; } .form-check-input[type="radio"] { width: 1.1em; height: 1.1em; transform: scale(1.15); } .form-check-input[type="radio"]:checked::before { width: 0.4em; height: 0.4em; } .score-options-wrapper { gap: 6px; justify-content: space-around; } }
+
+        /* --- PDF Specific Styles (Simplificados) --- */
+        .pdf-capture-mode {
+            font-family: sans-serif !important; /* Fuente estándar PDF */
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-size: 10pt !important;
+        }
+        .pdf-capture-mode .card {
+            box-shadow: none !important;
+            border: 1px solid #cccccc !important;
+            border-radius: 0 !important;
+            margin-bottom: 5px !important; /* Menos espacio */
+            overflow: visible !important;
+        }
+        .pdf-capture-mode .card-header {
+             background-color: #f0f0f0 !important; /* Gris más claro */
+             color: #000000 !important;
+             border-bottom: 1px solid #cccccc !important;
+             font-weight: bold !important;
+             font-size: 11pt !important;
+             padding: 5px 8px !important;
+        }
+         /* Estilos específicos para Info, Comentarios, Puntaje en PDF */
+         .pdf-capture-mode #infoGeneralCard .card-header,
+         .pdf-capture-mode #commentsCard .card-header,
+         .pdf-capture-mode #totalScoreCardScreen .total-score-section {
+              background-color: #ffffff !important;
+              border: none !important;
+              text-align: left !important;
+              padding: 8px 0 !important; /* Ajustar padding */
+         }
+         /* Asegurar que el texto dentro de estas secciones se vea bien */
+         .pdf-capture-mode #infoGeneralCard .card-body,
+         .pdf-capture-mode #commentsCard .card-body,
+         .pdf-capture-mode #totalScoreCardScreen .card-body {
+              padding: 5px 0 !important;
+         }
+         .pdf-capture-mode #totalScoreCardScreen h4 {
+             font-size: 12pt !important; color: #000000 !important; font-weight: bold !important;
+         }
+         /* Simplificar tabla en PDF */
+         .pdf-capture-mode .rubric-table { font-size: 9pt !important; }
+         .pdf-capture-mode .rubric-table th,
+         .pdf-capture-mode .rubric-table td { padding: 3px !important; border: 1px solid #dddddd !important; vertical-align: middle !important; }
+         .pdf-capture-mode .score-options-wrapper { gap: 3px !important; padding: 1px 0 !important;}
+         .pdf-capture-mode .score-value { font-size: 7pt !important; margin-bottom: 1px !important; color: #333333 !important;}
+         .pdf-capture-mode .form-check-input[type="radio"] { display: none !important; }
+         /* Mostrar checkmark en celda seleccionada */
+         .pdf-capture-mode td:has(input[type="radio"]:checked)::after { content: '✔'; display: block; text-align: center; font-size: 10pt; color: #000000; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+         .pdf-capture-mode td { position: relative; } /* Necesario para posicionar el ::after */
+         .pdf-capture-mode td:has(input[type="radio"]:checked) { background-color: #ffffff !important; } /* Sin resaltado */
+
+         /* Ocultar elementos no deseados en PDF */
+        .pdf-capture-mode header,
+        .pdf-capture-mode #buttonsCard,
+        .pdf-capture-mode .score-display, /* Ocultar puntaje en cabecera de sección */
+        .pdf-capture-mode .invalid-feedback /* Ocultar mensajes de validación */
+         { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4 mb-5">
+        <header class="text-center mb-5">
+            <h1>Rúbrica de Evaluación de Clases</h1>
+            <h2 class="mt-1">Residencia de Cuidados Intensivos</h2>
+        </header>
+
+         <div id="formArea">
+            <form id="rubricForm" class="needs-validation" novalidate>
+
+                <section class="card" id="infoGeneralCard">
+                    <div class="card-header">Información General</div>
+                    <div class="card-body"><div id="infoGeneralRow"><div class="flex-fill"><label for="evaluatorName" class="form-label">Evaluador</label><input type="text" class="form-control" id="evaluatorName" required placeholder="Nombre..."><div class="invalid-feedback">Ingrese nombre.</div></div><div class="flex-fill"><label for="residentName" class="form-label">Residente</label><input type="text" class="form-control" id="residentName" value="Dr. Jose Indalecio Lopez" readonly></div><div class="flex-fill"><label for="evaluationDate" class="form-label">Fecha</label><input type="date" class="form-control" id="evaluationDate" required><div class="invalid-feedback">Seleccione fecha.</div></div><div class="flex-fill"><label for="classTopic" class="form-label">Tema</label><input type="text" class="form-control" id="classTopic" required placeholder="Tema evaluado..."><div class="invalid-feedback">Ingrese tema.</div></div></div></div>
+                </section>
+
+                <section class="card rubric-section" data-section-title="I. Preparación y Organización" data-max-score="25" id="section1">
+                    <div class="card-header section-header"><span>I. Preparación y Organización (25 pts)</span><span class="float-end score-display text-muted">Puntos: 0 / 25</span></div>
+                    <div class="card-body p-0"><table class="table table-hover rubric-table mb-0"><tbody>
+                        <tr><td><label class="form-label">Dominio del Tema</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="dominioTema" value="5" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="dominioTema" value="4" data-desc="Bueno"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="dominioTema" value="3" data-desc="Satisfactorio"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="dominioTema" value="1" data-desc="Necesita Mejorar"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="dominioTema" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Organización de la Clase</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="organizacionClase" value="5" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="organizacionClase" value="4" data-desc="Bueno"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="organizacionClase" value="3" data-desc="Satisfactorio"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="organizacionClase" value="1" data-desc="Necesita Mejorar"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="organizacionClase" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Objetivos Claros</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="objetivosClaros" value="5" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="objetivosClaros" value="4" data-desc="Bueno"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="objetivosClaros" value="3" data-desc="Satisfactorio"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="objetivosClaros" value="1" data-desc="Necesita Mejorar"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="objetivosClaros" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Material de Apoyo</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="materialApoyo" value="5" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="materialApoyo" value="4" data-desc="Bueno"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="materialApoyo" value="3" data-desc="Satisfactorio"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="materialApoyo" value="1" data-desc="Necesita Mejorar"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="materialApoyo" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Manejo del Tiempo</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="manejoTiempo" value="5" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="manejoTiempo" value="4" data-desc="Bueno"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="manejoTiempo" value="3" data-desc="Satisfactorio"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="manejoTiempo" value="1" data-desc="Necesita Mejorar"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="manejoTiempo" value="0" data-desc="No Cumple"></div></div></td></tr>
+                    </tbody></table></div>
+                </section>
+                <section class="card rubric-section" data-section-title="II. Metodología y Habilidades de Enseñanza" data-max-score="35" id="section2">
+                    <div class="card-header section-header"><span>II. Metodología y Habilidades de Enseñanza (35 pts)</span><span class="float-end score-display text-muted">Puntos: 0 / 35</span></div>
+                    <div class="card-body p-0"><table class="table table-hover rubric-table mb-0"><tbody>
+                        <tr><td><label class="form-label">Claridad en la Exposición</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">7</span><input class="form-check-input" type="radio" name="claridadExpo" value="7" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">6</span><input class="form-check-input" type="radio" name="claridadExpo" value="6" data-desc="Bueno (6)"></div> <div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="claridadExpo" value="5" data-desc="Bueno (5)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="claridadExpo" value="4" data-desc="Satisfactorio (4)"></div> <div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="claridadExpo" value="3" data-desc="Satisfactorio (3)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">2</span><input class="form-check-input" type="radio" name="claridadExpo" value="2" data-desc="Necesita Mejorar (2)"></div> <div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="claridadExpo" value="1" data-desc="Necesita Mejorar (1)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="claridadExpo" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Fomento de la Participación</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">7</span><input class="form-check-input" type="radio" name="fomentoPart" value="7" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">6</span><input class="form-check-input" type="radio" name="fomentoPart" value="6" data-desc="Bueno (6)"></div> <div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="fomentoPart" value="5" data-desc="Bueno (5)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="fomentoPart" value="4" data-desc="Satisfactorio (4)"></div> <div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="fomentoPart" value="3" data-desc="Satisfactorio (3)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">2</span><input class="form-check-input" type="radio" name="fomentoPart" value="2" data-desc="Necesita Mejorar (2)"></div> <div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="fomentoPart" value="1" data-desc="Necesita Mejorar (1)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="fomentoPart" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Uso de Ejemplos/Casos</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">7</span><input class="form-check-input" type="radio" name="usoEjemplos" value="7" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">6</span><input class="form-check-input" type="radio" name="usoEjemplos" value="6" data-desc="Bueno (6)"></div> <div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="usoEjemplos" value="5" data-desc="Bueno (5)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="usoEjemplos" value="4" data-desc="Satisfactorio (4)"></div> <div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="usoEjemplos" value="3" data-desc="Satisfactorio (3)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">2</span><input class="form-check-input" type="radio" name="usoEjemplos" value="2" data-desc="Necesita Mejorar (2)"></div> <div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="usoEjemplos" value="1" data-desc="Necesita Mejorar (1)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="usoEjemplos" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Adaptación al Nivel</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">7</span><input class="form-check-input" type="radio" name="adaptacionNivel" value="7" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">6</span><input class="form-check-input" type="radio" name="adaptacionNivel" value="6" data-desc="Bueno (6)"></div> <div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="adaptacionNivel" value="5" data-desc="Bueno (5)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="adaptacionNivel" value="4" data-desc="Satisfactorio (4)"></div> <div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="adaptacionNivel" value="3" data-desc="Satisfactorio (3)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">2</span><input class="form-check-input" type="radio" name="adaptacionNivel" value="2" data-desc="Necesita Mejorar (2)"></div> <div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="adaptacionNivel" value="1" data-desc="Necesita Mejorar (1)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="adaptacionNivel" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Entusiasmo e Interés</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">7</span><input class="form-check-input" type="radio" name="entusiasmoInteres" value="7" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">6</span><input class="form-check-input" type="radio" name="entusiasmoInteres" value="6" data-desc="Bueno (6)"></div> <div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="entusiasmoInteres" value="5" data-desc="Bueno (5)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="entusiasmoInteres" value="4" data-desc="Satisfactorio (4)"></div> <div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="entusiasmoInteres" value="3" data-desc="Satisfactorio (3)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">2</span><input class="form-check-input" type="radio" name="entusiasmoInteres" value="2" data-desc="Necesita Mejorar (2)"></div> <div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="entusiasmoInteres" value="1" data-desc="Necesita Mejorar (1)"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="entusiasmoInteres" value="0" data-desc="No Cumple"></div></div></td></tr>
+                    </tbody></table></div>
+                </section>
+                <section class="card rubric-section" data-section-title="III. Interacción y Comunicación" data-max-score="15" id="section3">
+                    <div class="card-header section-header"><span>III. Interacción y Comunicación (15 pts)</span><span class="float-end score-display text-muted">Puntos: 0 / 15</span></div>
+                    <div class="card-body p-0"><table class="table table-hover rubric-table mb-0"><tbody>
+                        <tr><td><label class="form-label">Habilidad de Escucha</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="habilidadEscucha" value="5" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="habilidadEscucha" value="4" data-desc="Bueno"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="habilidadEscucha" value="3" data-desc="Satisfactorio"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="habilidadEscucha" value="1" data-desc="Necesita Mejorar"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="habilidadEscucha" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Respeto y Profesionalismo</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="respetoProf" value="5" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="respetoProf" value="4" data-desc="Bueno"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="respetoProf" value="3" data-desc="Satisfactorio"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="respetoProf" value="1" data-desc="Necesita Mejorar"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="respetoProf" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Comunicación No Verbal</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="comunicacionNV" value="5" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="comunicacionNV" value="4" data-desc="Bueno"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="comunicacionNV" value="3" data-desc="Satisfactorio"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="comunicacionNV" value="1" data-desc="Necesita Mejorar"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="comunicacionNV" value="0" data-desc="No Cumple"></div></div></td></tr>
+                    </tbody></table></div>
+                 </section>
+                 <section class="card rubric-section" data-section-title="IV. Relevancia Clínica y Aplicabilidad" data-max-score="15" id="section4">
+                     <div class="card-header section-header"><span>IV. Relevancia Clínica y Aplicabilidad (15 pts)</span><span class="float-end score-display text-muted">Puntos: 0 / 15</span></div>
+                    <div class="card-body p-0"><table class="table table-hover rubric-table mb-0"><tbody>
+                        <tr><td><label class="form-label">Conexión con la Práctica</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="conexionPractica" value="5" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="conexionPractica" value="4" data-desc="Bueno"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="conexionPractica" value="3" data-desc="Satisfactorio"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="conexionPractica" value="1" data-desc="Necesita Mejorar"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="conexionPractica" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Fomento del Pensamiento Crítico</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="fomentoPensamiento" value="5" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="fomentoPensamiento" value="4" data-desc="Bueno"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="fomentoPensamiento" value="3" data-desc="Satisfactorio"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="fomentoPensamiento" value="1" data-desc="Necesita Mejorar"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="fomentoPensamiento" value="0" data-desc="No Cumple"></div></div></td></tr>
+                        <tr><td><label class="form-label">Actualización del Contenido</label></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">5</span><input class="form-check-input" type="radio" name="actualizacionCont" value="5" required data-desc="Excelente"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">4</span><input class="form-check-input" type="radio" name="actualizacionCont" value="4" data-desc="Bueno"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">3</span><input class="form-check-input" type="radio" name="actualizacionCont" value="3" data-desc="Satisfactorio"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">1</span><input class="form-check-input" type="radio" name="actualizacionCont" value="1" data-desc="Necesita Mejorar"></div></div></td><td><div class="score-options-wrapper"><div class="score-option"><span class="score-value">0</span><input class="form-check-input" type="radio" name="actualizacionCont" value="0" data-desc="No Cumple"></div></div></td></tr>
+                    </tbody></table></div>
+                 </section>
+
+                <section class="card" id="commentsCard">
+                    <div class="card-header bg-light">Comentarios Adicionales</div>
+                    <div class="card-body">
+                        <div class="mb-3"><label for="strengths" class="form-label">Fortalezas Observadas:</label><textarea class="form-control" id="strengths" rows="4" placeholder="Describe las fortalezas observadas..."></textarea></div>
+                        <div><label for="areasForImprovement" class="form-label">Áreas de Mejora Sugeridas:</label><textarea class="form-control" id="areasForImprovement" rows="4" placeholder="Sugerencias específicas para mejorar..."></textarea></div>
+                    </div>
+                </section>
+
+                 <section class="card" id="totalScoreCardScreen">
+                     <div class="card-body text-center total-score-section" id="totalScoreCard">
+                        <h4>Puntuación Total: <span id="totalScoreDisplay" class="fw-bold">0 / 100</span></h4>
+                     </div>
+                 </section>
+
+            </form> <section class="card" id="buttonsCard">
+                 <div class="card-footer">
+                     <button type="button" id="calculateButton" class="btn btn-primary btn-lg me-2">Validar y Calcular</button>
+                     <button type="button" id="exportPdfButton" class="btn btn-success btn-lg" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-pdf-fill me-1" viewBox="0 0 16 16"><path d="M5.523 12.424q.21-.124.459-.238a8 8 0 0 1-.45.606c-.28.337-.498.516-.635.572l-.035.012a.3.3 0 0 1-.39-.3.49.49 0 0 1 .12-.258q.19-.287.458-.583zm-.022-2.416a.77.77 0 0 1-.43-1.445l.75-.42a.77.77 0 0 1 .43.153l.738.414a.77.77 0 0 1-.43 1.446l-.75.42a.77.77 0 0 1-.43-.153zm-.424-1.207a.65.65 0 0 1-.03-1.003l.56-.677a.65.65 0 0 1 .994.03l.56.677a.65.65 0 0 1-.03 1.003l-.56.677a.65.65 0 0 1-.994-.03zm.986 5.087a.99.99 0 0 1-.906 1.096L4.6 15.15a.99.99 0 0 1-1.096-.906l.318-1.426a.99.99 0 0 1 .906-1.096l1.426-.318a.99.99 0 0 1 1.096.906z"/><path fill-rule="evenodd" d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M3 9h1v1H3zm2 0h1v1H5zm2 0h1v1H7zm2 0h1v1H9zm2 0h1v1h-1z"/></svg>
+                        Exportar a PDF
+                     </button>
+                      <button type="reset" id="resetButton" class="btn btn-warning btn-lg ms-2">Limpiar</button>
+                 </div>
+            </section>
+
+        </div> </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('rubricForm');
+            const totalScoreDisplay = document.getElementById('totalScoreDisplay');
+            const exportPdfButton = document.getElementById('exportPdfButton');
+            const resetButton = document.getElementById('resetButton');
+            const calculateButton = document.getElementById('calculateButton');
+            const rubricSections = form.querySelectorAll('.rubric-section');
+            const directMaxScore = 90;
+            const finalMaxScore = 100;
+
+            // --- Cálculo de Puntuación Directa ---
+            function calculateRawScore() { /* ... (sin cambios) ... */
+                 let rawScore = 0; rubricSections.forEach(section => { const radioButtons = section.querySelectorAll('input[type="radio"]:checked'); radioButtons.forEach(radio => { const value = parseInt(radio.value, 10); if (!isNaN(value)) { rawScore += value; } }); }); return rawScore;
+             }
+            // --- Cálculo de Puntuación por Sección ---
+            function calculateSectionScore(section) { /* ... (sin cambios) ... */
+                let sectionScore = 0; const radioButtons = section.querySelectorAll('input[type="radio"]:checked'); radioButtons.forEach(radio => { const value = parseInt(radio.value, 10); if (!isNaN(value)) { sectionScore += value; } }); return sectionScore;
+            }
+            // --- Actualizar Display de Puntuaciones ---
+            function updateScoresDisplay() { /* ... (sin cambios) ... */
+                let totalRawScore = 0; rubricSections.forEach(section => { const sectionScore = calculateSectionScore(section); const maxScore = parseInt(section.dataset.maxScore, 10); const scoreDisplay = section.querySelector('.score-display'); if (scoreDisplay) { scoreDisplay.textContent = `Puntos: ${sectionScore} / ${maxScore}`; } totalRawScore += sectionScore; }); const scaledScore = directMaxScore === 0 ? 0 : (totalRawScore / directMaxScore) * finalMaxScore; const finalScore = Math.round(scaledScore * 10) / 10; totalScoreDisplay.textContent = `${finalScore} / ${finalMaxScore}`; return { rawScore: totalRawScore, finalScore };
+             }
+            // --- Event Listeners (Calcular, Limpiar, Change) ---
+            form.addEventListener('change', (event) => { if (event.target.type === 'radio') { updateScoresDisplay(); exportPdfButton.disabled = true; form.classList.remove('was-validated'); } });
+            calculateButton.addEventListener('click', () => { if (!form.checkValidity()) { form.classList.add('was-validated'); exportPdfButton.disabled = true; alert("Por favor, complete todos los criterios."); } else { form.classList.remove('was-validated'); const scores = updateScoresDisplay(); exportPdfButton.disabled = false; alert(`Validación completada. Puntuación Final: ${scores.finalScore} / ${finalMaxScore}. Puede exportar a PDF.`); } });
+            resetButton.addEventListener('click', () => { form.reset(); form.classList.remove('was-validated'); rubricSections.forEach(section => { const scoreDisplay = section.querySelector('.score-display'); const maxScore = parseInt(section.dataset.maxScore, 10); if (scoreDisplay) { scoreDisplay.textContent = `Puntos: 0 / ${maxScore}`; } }); totalScoreDisplay.textContent = `0 / ${finalMaxScore}`; exportPdfButton.disabled = true; form.querySelectorAll('.rubric-table td').forEach(td => td.style.backgroundColor = ''); });
+
+            // --- Event Listener para Botón Exportar PDF (CORREGIDO Y OPTIMIZADO) ---
+            exportPdfButton.addEventListener('click', async () => {
+                 if (!form.checkValidity()) {
+                     alert("Por favor, complete y valide la rúbrica ('Validar y Calcular') antes de exportar.");
+                     form.classList.add('was-validated');
+                     return;
+                 }
+
+                 // --- Preparación de Datos ---
+                 const evaluatorName = document.getElementById('evaluatorName').value;
+                 const residentName = document.getElementById('residentName').value;
+                 const evaluationDate = document.getElementById('evaluationDate').value;
+                 const classTopic = document.getElementById('classTopic').value;
+                 const strengths = document.getElementById('strengths').value.trim();
+                 const areasForImprovement = document.getElementById('areasForImprovement').value.trim();
+                 const scores = updateScoresDisplay(); // Asegura puntaje actualizado
+
+                 // --- Inicialización jsPDF ---
+                 const { jsPDF } = window.jspdf;
+                 const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
+
+                 // --- Constantes PDF ---
+                 const margin = 10; // Margen mínimo solicitado
+                 const pdfWidth = pdf.internal.pageSize.getWidth();
+                 const pdfHeight = pdf.internal.pageSize.getHeight();
+                 let currentY = margin; // Posición Y inicial
+                 let pageNum = 1;
+                 const footerHeight = 10;
+                 const pageHeightAvailable = pdfHeight - margin - footerHeight;
+
+                 // --- Funciones Auxiliares PDF ---
+                 function addHeaderFooter() {
+                     pdf.setFontSize(8);
+                     pdf.setFont('helvetica', 'normal'); // Fuente estándar
+                     pdf.setTextColor(150);
+                     const generationTime = new Date().toLocaleString('es-NI', { timeZone: 'America/Managua' });
+                     pdf.text(`Generado: ${generationTime}`, margin, pdfHeight - margin + 5);
+                     pdf.text(`Página ${pageNum}`, pdfWidth - margin, pdfHeight - margin + 5, { align: 'right' });
+                     pdf.setTextColor(51); // Reset color
+                 }
+
+                 // --- Función para añadir imagen al PDF (Corregida para paginación) ---
+                 const addImageToPdf = (imgData, element) => {
+                     if (!imgData || !element) return;
+                     const imgProps = pdf.getImageProperties(imgData);
+                     const contentWidth = pdfWidth - (margin * 2);
+                     const imgOrigWidth = imgProps.width;
+                     const imgOrigHeight = imgProps.height;
+                     const imgHeight = (imgOrigHeight * contentWidth) / imgOrigWidth; // Alto proporcional en PDF
+
+                     if (currentY + imgHeight > pageHeightAvailable) {
+                         addHeaderFooter(); // Añadir pie a página actual
+                         pdf.addPage();
+                         pageNum++;
+                         currentY = margin; // Reset Y en nueva página
+                     }
+                     pdf.addImage(imgData, 'PNG', margin, currentY, contentWidth, imgHeight);
+                     currentY += imgHeight + 5; // Espacio reducido después de la imagen
+                 };
+
+                 // --- Función para capturar elemento (con opciones optimizadas) ---
+                 const captureElement = async (elementId) => {
+                     const element = document.getElementById(elementId);
+                     if (!element) { console.error(`Elemento no encontrado: ${elementId}`); return null; }
+                     document.body.classList.add('pdf-capture-mode'); // Aplicar estilos PDF
+                     const originalDisplay = element.style.display;
+                     element.style.display = 'block'; // Asegurar visibilidad
+                     await new Promise(resolve => setTimeout(resolve, 50)); // Pausa breve
+
+                     // Opciones de html2canvas optimizadas
+                     const canvasOptions = {
+                         scale: 1.5, // Escala solicitada (0.8 era muy baja)
+                         useCORS: false, // No recursos externos
+                         logging: false,
+                         backgroundColor: '#ffffff',
+                         scrollY: -window.scrollY, // Corregir scroll
+                         windowWidth: document.documentElement.scrollWidth,
+                         width: element.offsetWidth,
+                         height: element.offsetHeight
+                     };
+
+                     let canvas = null;
+                     try {
+                        canvas = await html2canvas(element, canvasOptions);
+                     } catch (canvasError) {
+                         console.error(`Error en html2canvas para ${elementId}:`, canvasError);
+                         // Intentar sin scrollY si falla la primera vez (workaround común)
+                         try {
+                              console.log("Intentando captura sin scrollY...");
+                              canvasOptions.scrollY = 0;
+                              canvas = await html2canvas(element, canvasOptions);
+                         } catch (fallbackError) {
+                              console.error(`Error en html2canvas (fallback) para ${elementId}:`, fallbackError);
+                              document.body.classList.remove('pdf-capture-mode'); // Limpiar clase
+                              element.style.display = originalDisplay;
+                              return null; // Retornar null si falla
+                         }
+                     }
+
+                     element.style.display = originalDisplay;
+                     document.body.classList.remove('pdf-capture-mode'); // Limpiar clase
+                     return canvas.toDataURL('image/png', 0.92); // Devolver Data URL
+                 };
+
+
+                 // --- Generación del PDF por Secciones ---
+                 // Envolver toda la generación en try-catch
+                 try {
+                     // --- PÁGINA 1 ---
+                     pdf.setFontSize(16); pdf.setFont("helvetica", "bold"); pdf.setTextColor(37, 99, 235);
+                     pdf.text("Reporte de Evaluación - Residencia UCI", pdfWidth / 2, currentY, { align: 'center' });
+                     currentY += 12; pdf.setFont("helvetica", "normal"); pdf.setTextColor(51);
+
+                     // 1. Info General (captura)
+                     const infoCardImg = await captureElement('infoGeneralCard');
+                     if (infoCardImg) addImageToPdf(infoCardImg, document.getElementById('infoGeneralCard')); else throw new Error("Fallo al capturar Info General");
+
+                     // 2. Título Evaluación (texto directo)
+                     pdf.setFontSize(13); pdf.setFont("helvetica", "bold"); pdf.setTextColor(37, 99, 235);
+                     if(currentY + 10 > pageHeightAvailable) { pdf.addPage(); pageNum++; currentY = margin; } // Chequeo manual simple
+                     pdf.text("Evaluación Detallada", margin, currentY);
+                     currentY += 8; pdf.setFont("helvetica", "normal"); pdf.setTextColor(51);
+
+                     // 3. Secciones Rúbrica (captura individual)
+                     for (let i = 1; i <= 4; i++) {
+                         const sectionImg = await captureElement(`section${i}`);
+                         if (sectionImg) addImageToPdf(sectionImg, document.getElementById(`section${i}`)); else console.warn(`Fallo al capturar section${i}`); // Advertir si falla una sección
+                     }
+
+                     // 4. Puntaje Total (captura)
+                     const totalScoreImg = await captureElement('totalScoreCardScreen');
+                      if (totalScoreImg) addImageToPdf(totalScoreImg, document.getElementById('totalScoreCardScreen')); else throw new Error("Fallo al capturar Puntaje Total");
+
+                     // 5. Comentarios (captura si existen)
+                     if (strengths || areasForImprovement) {
+                         pdf.setFontSize(13); pdf.setFont("helvetica", "bold"); pdf.setTextColor(37, 99, 235);
+                         if(currentY + 10 > pageHeightAvailable) { pdf.addPage(); pageNum++; currentY = margin; } // Chequeo manual
+                         pdf.text("Comentarios Adicionales", margin, currentY);
+                         currentY += 8; pdf.setFont("helvetica", "normal"); pdf.setTextColor(51);
+
+                         const commentsCardImg = await captureElement('commentsCard');
+                          if (commentsCardImg) addImageToPdf(commentsCardImg, document.getElementById('commentsCard')); else console.warn("Fallo al capturar Comentarios");
+                     }
+
+                     // Añadir pie de página a la última página generada
+                     addHeaderFooter();
+                     // Eliminar página extra si la última quedó vacía (lógica mejorada)
+                     if (pdf.internal.getNumberOfPages() > pageNum) { // Si jsPDF añadió una página extra por su cuenta
+                         pdf.deletePage(pdf.internal.getNumberOfPages());
+                     }
+
+                     // Guardar PDF
+                     pdf.save(`Evaluacion_${residentName.replace(/\s+/g, '_')}_${evaluationDate}.pdf`);
+
+                 } catch (error) {
+                     console.error("Error durante la generación del PDF:", error); // Mostrar error detallado en consola
+                     alert(`Hubo un error al generar el PDF:\n${error.message}\n\nRevise la consola (F12) para más detalles.`); // Mostrar error al usuario
+                     document.body.classList.remove('pdf-capture-mode'); // Asegurar quitar clase en caso de error
+                 } finally {
+                     // Asegurarse de quitar la clase de captura incluso si no hay error
+                      document.body.classList.remove('pdf-capture-mode');
+                 }
+            }); // Fin exportPdfButton click listener
+
+        }); // Fin DOMContentLoaded
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,218 @@
+// rubrica.js
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('rubricForm');
+    const totalScoreDisplay = document.getElementById('totalScoreDisplay');
+    const exportPdfButton = document.getElementById('exportPdfButton');
+    const resetButton = document.getElementById('resetButton');
+    const rubricSections = form.querySelectorAll('.rubric-section');
+
+    // --- Cálculo de Puntuación ---
+    function calculateSectionScore(section) {
+        let sectionScore = 0;
+        const radioButtons = section.querySelectorAll('input[type="radio"]:checked');
+        radioButtons.forEach(radio => {
+            sectionScore += parseInt(radio.value, 10);
+        });
+        return sectionScore;
+    }
+
+    function updateTotalScore() {
+        let totalScore = 0;
+        rubricSections.forEach(section => {
+            const sectionScore = calculateSectionScore(section);
+            const maxScore = parseInt(section.dataset.maxScore, 10);
+            const scoreDisplay = section.querySelector('.score-display');
+            if (scoreDisplay) {
+                scoreDisplay.textContent = `Puntos: ${sectionScore} / ${maxScore}`;
+            }
+            totalScore += sectionScore;
+        });
+        totalScoreDisplay.textContent = `${totalScore} / 100`;
+        return totalScore; // Devuelve la puntuación total calculada
+    }
+
+     // --- Actualizar puntuación al cambiar selección ---
+    form.addEventListener('change', (event) => {
+        if (event.target.type === 'radio') {
+            updateTotalScore();
+             // Habilita el botón PDF solo si el formulario es válido (todos los radios marcados)
+             exportPdfButton.disabled = !form.checkValidity();
+        }
+    });
+
+    // --- Validación y Cálculo al Enviar ---
+    form.addEventListener('submit', (event) => {
+        event.preventDefault(); // Evita el envío tradicional del formulario
+        event.stopPropagation();
+
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+             exportPdfButton.disabled = true;
+            alert("Por favor, complete todos los campos y criterios de la rúbrica.");
+        } else {
+            form.classList.add('was-validated'); // Muestra validación aunque esté correcto
+            const finalScore = updateTotalScore(); // Calcula y muestra la puntuación final
+            exportPdfButton.disabled = false; // Habilita el botón PDF
+             alert(`Cálculo completado. Puntuación Total: ${finalScore} / 100. Ahora puede exportar a PDF.`);
+        }
+    });
+
+     // --- Limpiar Formulario ---
+    resetButton.addEventListener('click', () => {
+        form.reset(); // Limpia todos los inputs
+        form.classList.remove('was-validated'); // Quita clases de validación
+        rubricSections.forEach(section => {
+             const scoreDisplay = section.querySelector('.score-display');
+             const maxScore = parseInt(section.dataset.maxScore, 10);
+             if (scoreDisplay) {
+                scoreDisplay.textContent = `Puntos: 0 / ${maxScore}`;
+             }
+        });
+        totalScoreDisplay.textContent = `0 / 100`;
+        exportPdfButton.disabled = true; // Deshabilita botón PDF
+    });
+
+    // --- Exportar a PDF ---
+    exportPdfButton.addEventListener('click', () => {
+        if (!form.checkValidity()) {
+             alert("Por favor, complete toda la rúbrica antes de exportar.");
+             form.classList.add('was-validated');
+             return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'p', // portrait
+            unit: 'mm',
+            format: 'a4' // o 'letter'
+        });
+
+        const evaluatorName = document.getElementById('evaluatorName').value;
+        const residentName = document.getElementById('residentName').value;
+        const evaluationDate = document.getElementById('evaluationDate').value;
+        const classTopic = document.getElementById('classTopic').value;
+        const strengths = document.getElementById('strengths').value;
+        const areasForImprovement = document.getElementById('areasForImprovement').value;
+        const finalScoreText = totalScoreDisplay.textContent;
+
+
+        // Usar html2canvas para renderizar el formulario (excluyendo botones, etc. via CSS @media print)
+        // Selecciona el contenedor principal o el propio form para renderizar
+        const elementToRender = document.getElementById('rubricForm');
+
+         // Crear elementos temporales para la información general en el PDF
+        const infoContainer = document.createElement('div');
+        infoContainer.style.display = 'none'; // Ocultarlo
+        infoContainer.innerHTML = `
+            <div id="pdf-info" style="padding: 10mm; font-size: 10pt;">
+                <h3>Reporte de Evaluación</h3>
+                <p><strong>Evaluador:</strong> ${evaluatorName}</p>
+                <p><strong>Residente Evaluado:</strong> ${residentName}</p>
+                <p><strong>Fecha:</strong> ${evaluationDate || 'No especificada'}</p>
+                <p><strong>Tema:</strong> ${classTopic}</p>
+                <hr>
+            </div>
+            <div id="pdf-comments" style="padding: 0 10mm; font-size: 10pt;">
+                 <h4>Comentarios:</h4>
+                 <p><strong>Fortalezas:</strong><br>${strengths || 'N/A'}</p>
+                 <p><strong>Áreas de Mejora:</strong><br>${areasForImprovement || 'N/A'}</p>
+                 <hr>
+                 <h4>Puntuación Total: ${finalScoreText}</h4>
+                 <hr>
+                 <h4>Detalle de Evaluación:</h4>
+            </div>
+        `;
+        document.body.appendChild(infoContainer); // Añadir al DOM temporalmente
+
+
+        // --- Generación del PDF ---
+        const margin = 10; // Margen en mm
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const contentWidth = pdfWidth - (margin * 2);
+
+        let currentY = margin; // Posición Y actual
+
+        // 1. Añadir la información general primero
+        const infoElement = infoContainer.querySelector('#pdf-info');
+        html2canvas(infoElement, { scale: 2 }).then(canvas => { // Aumentar escala mejora calidad
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = pdf.getImageProperties(imgData);
+            const imgHeight = (imgProps.height * contentWidth) / imgProps.width;
+
+            if (currentY + imgHeight > pdfHeight - margin) {
+                pdf.addPage();
+                currentY = margin;
+            }
+            pdf.addImage(imgData, 'PNG', margin, currentY, contentWidth, imgHeight);
+            currentY += imgHeight + 5; // Añadir espacio
+
+            // 2. Añadir las tablas de la rúbrica
+            const rubricTables = form.querySelectorAll('.rubric-section .card-body'); // Seleccionar el cuerpo de cada sección
+             let tablePromises = [];
+
+             rubricTables.forEach((tableContainer, index) => {
+                const sectionHeader = form.querySelectorAll('.rubric-section .card-header')[index].innerText.split('Puntos')[0].trim(); // Obtener texto del encabezado
+
+                // Añadir Título de la sección
+                pdf.setFontSize(12);
+                pdf.setFont(undefined, 'bold');
+                if (currentY + 10 > pdfHeight - margin) { // Check space for header
+                   pdf.addPage();
+                   currentY = margin;
+                }
+                pdf.text(sectionHeader, margin, currentY);
+                currentY += 7;
+                pdf.setFont(undefined, 'normal');
+                pdf.setFontSize(10);
+
+
+                tablePromises.push(
+                    html2canvas(tableContainer.querySelector('.rubric-table'), { scale: 2 }).then(canvas => {
+                         return { canvas: canvas, yPos: currentY }; // Devolver canvas y posición Y necesaria
+                     })
+                );
+             });
+
+            Promise.all(tablePromises).then(results => {
+                results.forEach(result => {
+                     const { canvas, yPos } = result;
+                     const imgData = canvas.toDataURL('image/png');
+                     const imgProps = pdf.getImageProperties(imgData);
+                     const imgHeight = (imgProps.height * contentWidth) / imgProps.width;
+
+                     if (yPos + imgHeight > pdfHeight - margin) {
+                         pdf.addPage();
+                         currentY = margin; // Reiniciar Y en nueva página
+                     } else {
+                         currentY = yPos; // Usar la Y calculada si cabe
+                     }
+
+                     pdf.addImage(imgData, 'PNG', margin, currentY, contentWidth, imgHeight);
+                     currentY += imgHeight + 5; // Actualizar Y para el siguiente elemento
+                });
+
+                 // 3. Añadir Comentarios y Puntuación Final al final
+                 const commentsElement = infoContainer.querySelector('#pdf-comments');
+                 html2canvas(commentsElement, { scale: 2 }).then(canvasComments => {
+                    const imgDataComments = canvasComments.toDataURL('image/png');
+                    const imgPropsComments = pdf.getImageProperties(imgDataComments);
+                    const imgHeightComments = (imgPropsComments.height * contentWidth) / imgPropsComments.width;
+
+                     if (currentY + imgHeightComments > pdfHeight - margin) {
+                        pdf.addPage();
+                        currentY = margin;
+                    }
+                    pdf.addImage(imgDataComments, 'PNG', margin, currentY, contentWidth, imgHeightComments);
+
+                     // Limpiar elemento temporal
+                     document.body.removeChild(infoContainer);
+
+                     // Guardar el PDF
+                     pdf.save(`Evaluacion_${residentName.replace(/\s+/g, '_')}_${evaluationDate}.pdf`);
+                 });
+            });
+        });
+    }); // Fin exportPdfButton click listener
+
+}); // Fin DOMContentLoaded
